@@ -16,4 +16,11 @@ public class SouGouInput {
         skin.display();
     }
 
+    public AbstractSkin getSkin() {
+        return skin;
+    }
+
+    public void setSkin(AbstractSkin skin) {
+        this.skin = skin;
+    }
 }
