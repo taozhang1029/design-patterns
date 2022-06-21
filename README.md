@@ -3,9 +3,34 @@
 ## 一、UML图
 
 在软件工程中，统一建模语言（UML）中的类图是一种静态结构图，它通过显示系统的类，其属性，操作（或方法）以及对象之间的关系来描述系统的结构。
-[使用mermaid绘制UML图](http://www.manongjc.com/detail/24-uliwhbrlcdrdqnw.html)
+[使用mermaid绘制UML图](https://www.cnblogs.com/mybdss/p/14958781.html)
 
-### 1、类的表示方式
+|       |               |          |                                                              |
+| :---- | :------------ | :------- | ------------------------------------------------------------ |
+| 描述  | 描述          | 说明     |                                                              |
+| <\|-- | Inheritance   | 继承     | 一般而言，如果类A扩展类B,类A不但包含从类B继承的方法，还会拥有一些额外的功能。 |
+| *--   | Composition   | 组合     |                                                              |
+| o--   | Aggregation   | 聚合     | 聚合关系意味着类A 的对象包含类B 的对象。                     |
+| -->   | Association   | 单向关联 |                                                              |
+| --    | Link (Solid)  | 双向关联 |                                                              |
+| ..>   | Dependency    | 依赖     | 如果一个类的方法操纵另一个类的对象， 我们就说一个类依赖于另一个类。 |
+| ..\|> | Realization   | 实现     |                                                              |
+| ..    | Link (Dashed) |          |                                                              |
+
+```mermaid
+classDiagram
+    classA --|> classB : 继承
+    classC --* classD : 组合
+    classE --o classF : 聚合
+    classG --> classH : 单向关联
+    classI -- classJ : 双向关联
+    classK ..> classL : 依赖
+    classM ..|> classN : 接口实现
+    classO .. classP : Link(Dashed)
+
+```
+
+###  1、类的表示方式
 
 UML类图使用包含类名、属性(field)和方法(method)且带有分割线的矩形来表示
 
