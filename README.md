@@ -30,7 +30,7 @@ classDiagram
 
 ```
 
-###  1、类的表示方式
+### 1、类的表示方式
 
 UML类图使用包含类名、属性(field)和方法(method)且带有分割线的矩形来表示
 
@@ -274,16 +274,248 @@ public class SkinClient {
     public static void main(String[] args) {
         // 1、创建搜狗输入法对象
         SouGouInput input = new SouGouInput();
-        
+
         // 2、创建皮肤对象
         // DefaultSkin skin = new DefaultSkin();
         CustomSkin skin = new CustomSkin();
-        
+
         // 3、设置皮肤对象到输入法
         input.setSkin(skin);
-        
+
         // 4、显示皮肤
         input.display();
+    }
+
+}
+```
+
+### 2、里氏代换原则
+
+任何基类可以出现的地方，子类一定可以出现  
+通俗理解：子类可以扩展父类的功能，但不能改变父类原有的功能，即子类继承父类时，除添加新方法完成新功能外，尽量不要重写父类方法。  
+**经典案例：** 正方形不是长方形
+
+```mermaid
+classDiagram
+Rectangle <.. RectangleDemo: 依赖
+Rectangle <|-- Square: 继承
+class Rectangle {
+  -double length
+  -double width
+  +setLength(double length) void
+  +getLength() double
+  +setWidth(double width) void
+  +getWidth() double
+}
+class Square {
+  +setLength(double length) void
+  +setWidth(double width) void
+}
+class RectangleDemo {
+  +resize(Rectangle rectangle) void
+  +printLengthAndWidth(Rectangle rectangle) double
+}
+```
+
+```java
+public class Rectangle {
+
+    private double length;
+
+    private double width;
+
+    public double getLength() {
+        return length;
+    }
+
+    public void setLength(double length) {
+        this.length = length;
+    }
+
+    public double getWidth() {
+        return width;
+    }
+
+    public void setWidth(double width) {
+        this.width = width;
+    }
+}
+```
+
+```java
+public class Square extends Rectangle {
+
+    @Override
+    public void setLength(double length) {
+        super.setLength(length);
+        super.setWidth(length);
+    }
+
+    @Override
+    public void setWidth(double width) {
+        super.setWidth(width);
+        super.setLength(width);
+    }
+}
+```
+
+```java
+public class RectangleDemo {
+
+    public static void main(String[] args) {
+        Rectangle rectangle = new Rectangle();
+        rectangle.setLength(20);
+        rectangle.setWidth(10);
+        resize(rectangle);
+        printLengthAndWidth(rectangle);
+
+        System.out.println("=============================");
+
+        Square square = new Square();
+        square.setLength(10);
+        resize(square); // 死循环
+        printLengthAndWidth(rectangle);
+    }
+
+    /**
+     * 扩宽方法
+     *
+     * @param rectangle 长方形
+     */
+    public static void resize(Rectangle rectangle) {
+        // 判断宽如果比长小，进行扩宽工作
+        while (rectangle.getWidth() <= rectangle.getLength()) {
+            rectangle.setWidth(rectangle.getWidth() + 1);
+        }
+    }
+
+    public static void printLengthAndWidth(Rectangle rectangle) {
+        System.out.printf("长方形的长=%s, 宽=%s%n", rectangle.getLength(), rectangle.getWidth());
+    }
+
+}
+```
+
+resize方法并不适合正方形，因为会产生死循环。 => resize方法中，Rectangle类型的参数不能被Square类型的参数代替，如果进行了替换就得不到预期结果。 因此，Square类和Rectangle类之间的继承关系违反了里氏代换原则，他们之间的继承关系不成立，即正方形不是长方形。  
+因此需要重新设计它们之间的关系，抽象出一个四边形接口，让它们去实现这个接口
+
+```mermaid
+classDiagram
+Quadrilateral <|.. Square: 实现
+Quadrilateral <|.. Rectangle: 实现
+Quadrilateral <.. RectangleDemo: 依赖
+Rectangle <.. RectangleDemo: 依赖
+class Quadrilateral {
+  <<Interface>>
+  +getLength() double
+  +getWidth() double
+}
+class Square {
+  -double side
+  +setSide(double side) void
+  +getLength() double
+  +getWidth() double
+}
+class Rectangle {
+  -double length
+  -double width
+  +setLength(double length) void
+  +getLength() double
+  +setWidth(double width) void
+  +getWidth() double
+}
+class RectangleDemo {
+  +resize(Rectangle rectangle) void
+  +printLengthAndWidth(Quadrilateral quadrilateral) double
+}
+```
+
+```java
+public interface Quadrilateral {
+
+    double getLength();
+
+    double getWidth();
+
+}
+```
+
+```java
+public class Rectangle implements Quadrilateral {
+
+    private double length;
+
+    private double width;
+
+    @Override
+    public double getLength() {
+        return this.length;
+    }
+
+    @Override
+    public double getWidth() {
+        return this.width;
+    }
+
+    public void setWidth(double width) {
+        this.width = width;
+    }
+
+    public void setLength(double length) {
+        this.length = length;
+    }
+
+}
+```
+
+```java
+public class Square implements Quadrilateral {
+
+    private double size;
+
+    @Override
+    public double getLength() {
+        return this.size;
+    }
+
+    @Override
+    public double getWidth() {
+        return this.size;
+    }
+
+    public void setSize(double size) {
+        this.size = size;
+    }
+}
+```
+
+```java
+public class RectangleDemo {
+
+    public static void main(String[] args) {
+        Rectangle rectangle = new Rectangle();
+        rectangle.setLength(20);
+        rectangle.setWidth(10);
+        resize(rectangle);
+        printLengthAndWidth(rectangle);
+
+        System.out.println("=============================");
+
+        Square square = new Square();
+        square.setSize(10);
+        // resize(square); // 无法编译，解决了“违反里氏代换原则”的问题
+        printLengthAndWidth(rectangle);
+    }
+
+    public static void resize(Rectangle rectangle) {
+        // 判断宽如果比长小，进行扩宽工作
+        while (rectangle.getWidth() <= rectangle.getLength()) {
+            rectangle.setWidth(rectangle.getWidth() + 1);
+        }
+    }
+
+    public static void printLengthAndWidth(Quadrilateral quadrilateral) {
+        System.out.printf("四边方形的长=%s, 宽=%s%n", quadrilateral.getLength(), quadrilateral.getWidth());
     }
 
 }
