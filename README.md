@@ -521,6 +521,157 @@ public class RectangleDemo {
 }
 ```
 
+### 3、依赖倒转原则
+
+**高层模块不应该依赖低层模块，两者都应该依赖其抽象；抽象不应该依赖细节，细节应该依赖抽象**  
+简单地说，就是要求对抽象进行编程，不要对实现进行编程，这样就降低了客户与实现模块之间的耦合。事实上**依赖倒转原则**是开闭原则的具体实现
+
+**案例：** 组装电脑
+
+优化前：
+
+```mermaid
+classDiagram
+Computer *-- XijieHardDisk: 组合
+Computer *-- IntelCpu: 组合
+Computer *-- KingstonMemory: 组合
+class Computer {
+	-XijieHardDisk hardDisk
+	-IntelCpu cpu
+	-KingstonMemory memory
+	+getHardDisk() XijieHardDisk
+	+setHardDisk(XijieHardDisk hardDisk) void
+	+getCpu() IntelCpu
+	+setCpu(IntelCpu cpu) void
+	+getMemory() KingstonMemory
+	+setMemory(KingstonMemory memory) void
+}
+class XijieHardDisk {
+	+write(String data) void
+	+read()String
+}
+class IntelCpu {
+	+run()String
+}
+class KingstonMemory {
+	+save()
+}
+```
+
+硬盘、CPU和内存的类型都写死了，要想更换必须修改源码，违反了开闭原则
+
+优化后：
+
+```mermaid
+classDiagram
+Computer *-- HardDisk: 组合
+Computer *-- Cpu: 组合
+Computer *-- Memory: 组合
+HardDisk <|.. XijieHardDisk: 实现
+Cpu <|.. IntelCpu: 实现
+Memory <|.. KingstonMemory: 实现
+class Computer {
+	-HardDisk hardDisk
+	-Cpu cpu
+	-Memory memory
+	+getHardDisk() HardDisk
+	+setHardDisk(HardDisk hardDisk) void
+	+getCpu() Cpu
+	+setCpu(Cpu cpu) void
+	+getMemory() Memory
+	+setMemory(Memory memory) void
+}
+class HardDisk {
+	<<Interface>>
+	+write(String data) void
+	+read()String
+}
+class Cpu {
+	<<Interface>>
+	+run()String
+}
+class Memory {
+	<<Interface>>
+	+save()
+}
+class XijieHardDisk {
+	+write(String data) void
+	+read()String
+}
+class IntelCpu {
+	+run()String
+}
+class KingstonMemory {
+	+save()
+}
+```
+
+### 4、接口隔离原则
+
+**客户端不应该被迫依赖于他不使用的方法，即一个类对另一个类的依赖应该建立在最小的接口上**
+
+举例：A品牌的安全门具有防火、防水和防盗的功能，可以将防火、防水和防盗功能提取成一个接口，形成一套规范
+
+```mermaid
+classDiagram
+SafetyDoor <|.. ASafetyDoor: 实现
+class SafetyDoor {
+	<<Interface>>
+	+antiTheft() void
+	+fireproof() void
+	+waterproof() void
+}
+class ASafetyDoor {
+	+antiTheft() void
+	+fireproof() void
+	+waterproof() void
+}
+```
+
+这样设计存在的问题是，假如需要再设计B品牌的安全门，而B品牌的安全们只有防水、防盗功能，如果此时实现SafetyDoor接口，就不得不实现“防火”这一不应该实现的方法，这就违反了“接口隔离原则”
+
+**优化：根据功能将接口拆分成小接口**
+
+```mermaid
+classDiagram
+AntiTheft <|.. ASafetyDoor: 实现
+Fireproof <|.. ASafetyDoor: 实现
+Waterproof <|.. ASafetyDoor: 实现
+AntiTheft <|.. BSafetyDoor: 实现
+Waterproof <|.. BSafetyDoor: 实现
+class AntiTheft {
+	<<Interface>>
+	+antiTheft() void
+}
+class Fireproof {
+	<<Interface>>
+	+fireproof() void
+}
+class Waterproof {
+	<<Interface>>
+	+waterproof() void
+}
+class ASafetyDoor {
+	+antiTheft() void
+	+fireproof() void
+	+waterproof() void
+}
+class BSafetyDoor {
+	+antiTheft() void
+	+waterproof() void
+}
+```
+
+### 5、迪米特法则
+
+迪米特法则又叫最小知识原则：只和你的直接朋友交谈，不跟”陌生人“说话
+
+
+
+### 6、合成复用原则
+
+
+
 ## 三、设计模式
 
 分类：
