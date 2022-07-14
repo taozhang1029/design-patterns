@@ -264,11 +264,6 @@ public class SouGouInput {
 ```
 
 ```java
-/**
- * @author ZhangTao
- * @date 2022/6/21
- * @desc
- */
 public class SkinClient {
 
     public static void main(String[] args) {
@@ -666,39 +661,167 @@ class BSafetyDoor {
 
 迪米特法则又叫最小知识原则：只和你的直接朋友交谈，不跟”陌生人“说话
 
+其含义是：如果两个软件实体无需直接通信，那么就不应该发生直接的相互调用，可以通过第三方转发该调用。其目的是降低类之间的耦合，提高模块的相对独立性。
 
+举例：明星与经纪人的关系实例
+
+```mermaid
+classDiagram
+Agent o-- Star: 聚合
+Agent o-- Fans: 聚合
+Agent o-- Company: 聚合
+class Agent {
+  -Star star
+  -Company company
+  -List~Fans~ fansList
+  +setStar(Star star) void
+  +setCompany(Company company) void
+  +setFans(List~Fans~ fansList) void
+  +meeting() void
+  +business() void
+}
+
+class Star {
+  -String name
+  +Star(String name)
+  +getName() String
+}
+
+class Fans {
+  -String name
+  +Fans(String name)
+  +getName() String
+}
+
+class Company {
+  -String name
+  +Company(String name)
+  +getName() String
+}
+```
 
 ### 6、合成复用原则
 
+尽量先使用组合或者聚合等关联关系来实现，其次才考虑使用继承关系来实现
 
+通常类的复用分为继承复用和合成复用两种。继承复用虽然有简单和易实现的优点，但也存在以下缺点：
+
+1. 破坏了类的封装性。因为继承会将父类的实现细节暴露给子类，父类对子类是透明的，所以这种复用又称为“白箱”复用
+2. 子类与父类的耦合度高。父类的实现的任何改变都会导致子类的实现发生变化，这不利于类的扩展与维护
+3. 限制了复用的灵活性。从父类继承而来的实现是静态的，在编译时已经定义，所以在运行期不可能发生变化
+
+采用组合和聚合复用时，可以将已有对象纳入新对象中，使之成为新对象的一部分，新对象可以调用已有对象的功能，它有以下优点：
+
+1. 它维持了类的封装性。因为成分对象的内部细节是新对象看不见的，所以这种复用又称为“黑箱”复用
+2. 对象间的耦合度低，可以在类的成员位置声明对象
+3. 复用的灵活性高。这种复用可以在运行时动态进行，新对象可以动态地引用与成分对象类型相同的对象（如子类）
+
+举例：汽车分类管理程序 汽车按“动力源”划分可分为汽油汽车、电动汽车；按“颜色”划分可分为白色汽车、黑色汽车和红色汽车等。如果同时考虑这两种分类，其组合就很多。
+
+```mermaid
+classDiagram
+Car <|-- PetrolCar
+Car <|-- ElectricCar
+PetrolCar <|-- RedPetrolCar
+PetrolCar <|-- WhitePetrolCar
+ElectricCar <|-- RedElectricCar
+ElectricCar <|-- WhiteElectricCar
+class Car {
+  +move() void
+}
+
+class PetrolCar {
+  +move() void
+}
+
+class ElectricCar {
+  +move() void
+}
+
+class RedPetrolCar {
+  +move() void
+}
+
+class RedElectricCar {
+  +move() void
+}
+
+class WhitePetrolCar {
+  +move() void
+}
+
+class WhiteElectricCar {
+  +move() void
+}
+```
+
+从以上类图可以看出使用继承复用产生了很多子类，如果现在又有新的动力源或者新的颜色的化，就需要再定义新的类，我们试着将继承复用改成聚合复用
+
+```mermaid
+classDiagram
+Car o-- Color
+Color <|.. Red
+Color <|.. White
+Car <|-- PetrolCar
+Car <|-- ElectricCar
+class Car {
+  \#Color color
+  +move() void
+}
+
+class Color {
+  <<Interface>>
+}
+
+class PetrolCar {
+  +move() void
+}
+
+class ElectricCar {
+  +move() void
+}
+```
 
 ## 三、设计模式
 
-分类：
+### 1. **创建者模式**（5种）
 
-- **创建型模式**（5种）：用于描述怎样创建对象，主要特点是：将对象的创建与使用分离
-    - 单例模式
-    - 原型模式
-    - 工厂方法模式
-    - 抽象工厂模式
-    - 建造者模式
-- **结构型模式**（7种）：用于描述如何将类或对象按某种布局组成更大的结构
-    - 代理模式
-    - 适配器模式
-    - 桥接模式
-    - 装饰者模式
-    - 外观模式
-    - 享元模式
-    - 组合模式
-- **行为型模式**（11种）：用于描述类或对象之间怎样相互协作，共同完成单个对象无法单独完成的任务，以及怎样分配职责
-    - 模板方法模式
-    - 策略模式
-    - 命令模式
-    - 责任链模式
-    - 状态模式
-    - 观察者模式
-    - 中介者模式
-    - 迭代器模式
-    - 访问者模式
-    - 备忘录模式
-    - 解释器模式
+用于描述怎样创建对象，主要特点是：将对象的创建与使用分离，使用者不需要关注对象的创建细节，这样可以降低系统的耦合度
+
+- **单例模式**
+
+    这种模式涉及到一个单一的类，该类负责创建自己的对象，同时确保只有单个对象被创建，这个类提供了一种访问其唯一对象的方式，可以直接访问，不需要实例化该类的对象。分为饿汉式和懒汉式两种：
+    - 饿汉式：类加载就会导致该单例对象被创建
+    - 懒汉式：类加载不会导致该单例对象被创建，而是首次使用该对象时才会创建
+
+- **原型模式**
+- **工厂方法模式**
+- **抽象工厂模式**
+- **建造者模式**
+
+### 2. **结构型模式**（7种）
+
+用于描述如何将类或对象按某种布局组成更大的结构 - **代理模式**
+
+- **适配器模式**
+- **桥接模式**
+- **装饰者模式**
+- **外观模式**
+- **享元模式**
+- **组合模式**
+
+### 3. **行为型模式**（11种）
+
+用于描述类或对象之间怎样相互协作，共同完成单个对象无法单独完成的任务，以及怎样分配职责
+
+- **模板方法模式**
+- **策略模式**
+- **命令模式**
+- **责任链模式**
+- **状态模式**
+- **观察者模式**
+- **中介者模式**
+- **迭代器模式**
+- **访问者模式**
+- **备忘录模式**
+- **解释器模式**
