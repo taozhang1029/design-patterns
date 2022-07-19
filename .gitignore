@@ -1,3 +1,5 @@
 /.idea/**
 *.iml
 /out/**
+/obj.txt
+/obj2.txt
